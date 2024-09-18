@@ -1,0 +1,91 @@
+# Serverless Framework Configuration File
+
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: diegoarca
+
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: aws-serverless
+
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: aws-serverless
+
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+        - dynamodb:Query
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:888577066848:table/${self:custom.tableName}
+
+custom:
+  tableName: UsersModel
+
+package:
+  exclude:
+    - node_modules/**
+    - src/**
+    - tests/**
+    - .gitignore
+    - README.md
+
+functions:
+  # USERS API
+  newUser:
+    handler: src/User.newUser
+    events:
+      - httpApi:
+          path: /users
+          method: post
+
+  getUsers:
+    handler: src/User.getUsers
+    events:
+      - httpApi:
+          path: /users
+          method: get
+
+  getUser:
+    handler: src/User.getUser
+    events:
+      - httpApi:
+          path: /user/{id}
+          method: get
+
+  deleteUser:
+    handler: src/User.deleteUser
+    events:
+      - httpApi:
+          path: /user/{id}
+          method: delete
+
+  # SWAPI
+  getSwapi:
+    handler: src/Swapi.getData
+    events:
+      - httpApi:
+          path: /swapi
+          method: get
+
+resources:
+  Resources:
+    UsersModel:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
