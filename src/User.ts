@@ -3,6 +3,7 @@ import { DynamoDB } from 'aws-sdk';
 
 const dynamodb = new DynamoDB.DocumentClient();
 
+
 interface User {
   id: string;
   names: string;

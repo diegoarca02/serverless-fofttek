@@ -24,10 +24,12 @@ provider:
         - dynamodb:Scan
         - dynamodb:Query
       Resource:
-        - arn:aws:dynamodb:${self:provider.region}:888577066848:table/${self:custom.tableName}
+        - arn:aws:dynamodb:${self:provider.region}:888577066848:table/${self:custom.Test}
+        - arn:aws:dynamodb:${self:provider.region}:888577066848:table/${self:custom.User}
 
 custom:
-  tableName: UsersModel
+  Test: Test
+  User: User
 
 package:
   exclude:
@@ -38,49 +40,45 @@ package:
     - README.md
 
 functions:
-  # USERS API
-  newUser:
-    handler: src/User.newUser
+  Test:
+    handler: src/Handle.test
+    events:
+      - httpApi:
+          path: /test
+          method: get
+
+  CreateUser:
+    handler: src/Handle.createUser
     events:
       - httpApi:
           path: /users
           method: post
 
-  getUsers:
-    handler: src/User.getUsers
+  GetUsers:
+    handler: src/Handle.getUsers
     events:
       - httpApi:
           path: /users
           method: get
 
-  getUser:
-    handler: src/User.getUser
-    events:
-      - httpApi:
-          path: /user/{id}
-          method: get
-
-  deleteUser:
-    handler: src/User.deleteUser
-    events:
-      - httpApi:
-          path: /user/{id}
-          method: delete
-
-  # SWAPI
-  getSwapi:
-    handler: src/Swapi.getData
-    events:
-      - httpApi:
-          path: /swapi
-          method: get
-
 resources:
   Resources:
-    UsersModel:
+    TestModel:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.tableName}
+        TableName: ${self:custom.Test}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+    UserModel:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.User}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
