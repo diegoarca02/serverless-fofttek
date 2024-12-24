@@ -40,16 +40,6 @@ const fetchData = (url:string, params = {}) => axios.get(url, { params }).then((
     })
 } */
 
-    // Ejemplo para establecer y recuperar un valor en Redis
-const setCache = async (key: string, value: any) => {
-    await redis.set(key, JSON.stringify(value));  // Guardamos el valor en caché
-  };
-  
-const getCache = async (key: string) => {
-    const data = await redis.get(key);  // Recuperamos el valor desde caché
-    return data ? JSON.parse(data) : null;
-};
-
 export const test = async (event:any) => {
     const swapi = await fetchData(SWAPI_URL);
    
