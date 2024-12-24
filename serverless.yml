@@ -26,10 +26,12 @@ provider:
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:888577066848:table/${self:custom.Test}
         - arn:aws:dynamodb:${self:provider.region}:888577066848:table/${self:custom.User}
+        - arn:aws:dynamodb:${self:provider.region}:888577066848:table/${self:custom.Cache}
 
 custom:
   Test: Test
   User: User
+  Cache: Cache
 
 package:
   exclude:
@@ -86,4 +88,19 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+
+    CacheModel:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.Cache}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: cacheKey
+            AttributeType: S
+        KeySchema:
+          - AttributeName: cacheKey
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: expirationTime
+          Enabled: true
 

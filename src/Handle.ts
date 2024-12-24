@@ -14,6 +14,9 @@ const PLANET_COORDS: Record<string, { latitude: number; longitude: number }> = {
     'Endor': { latitude: 37.7749, longitude: -122.4194 },
     'Naboo': { latitude: 48.8566, longitude: 2.3522 }
 };
+const CACHE_KEY = 'getUsersCache';
+const CACHE_TTL = 30 * 60;
+
 /* interface User {
     id: string;
     names: string;
@@ -108,13 +111,44 @@ export const createUser = async (event: any) => {
 
 export const getUsers = async (event: any) => {
     try {
+
+        const cacheResult = await dynamodb.get({
+            TableName: 'Cache',
+            Key: { cacheKey: CACHE_KEY },
+        }).promise();
+
+        if (cacheResult.Item && cacheResult.Item.expirationTime > Date.now()) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    data: JSON.stringify(cacheResult.Item.data),
+                    type: 'cache'
+                }),
+            };
+        }
+
         const result = await dynamodb.scan({
             TableName: 'User'
         }).promise();
 
+        const data = result.Items;
+
+        // Guardar la nueva respuesta en la caché con un tiempo de expiración
+        await dynamodb.put({
+            TableName: 'Cache',
+            Item: {
+                cacheKey: CACHE_KEY,
+                data: data,
+                expirationTime: Date.now() + CACHE_TTL * 1000, // Tiempo actual + TTL
+            },
+        }).promise();
+
         return {
             statusCode: 200,
-            body: JSON.stringify(result.Items),
+            body: JSON.stringify({
+                data: data,
+                type: 'table'
+            }),
         };
     } catch (error:any) {
         console.error('Error fetching users:', error);
