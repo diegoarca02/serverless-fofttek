@@ -14,20 +14,12 @@ const PLANET_COORDS: Record<string, { latitude: number; longitude: number }> = {
     'Endor': { latitude: 37.7749, longitude: -122.4194 },
     'Naboo': { latitude: 48.8566, longitude: 2.3522 }
 };
-interface User {
+/* interface User {
     id: string;
     names: string;
     surname: string;
     createdAt: number;
-}
-
-
-// Configura la conexión con ElastiCache
-const redis = new Redis({
-    host: 'test-tsmpba.serverless.use1.cache.amazonaws.com',  // El punto de conexión
-    port: 6379,  // Puerto por defecto
-    tls: {}  // Si necesitas habilitar cifrado en tránsito
-});
+} */
 
 const fetchData = (url:string, params = {}) => axios.get(url, { params }).then((res:any) => res.data).catch(() => null);
 /* const fetch_ = (url:string, params:any) => {
